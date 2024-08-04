@@ -1,10 +1,7 @@
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const backendUrl =
-  process.env.BACKEND_URL || 'https://jupiter-chat-server.onrender.com/'
-
-const socket = io(backendUrl)
+const socket = io('http://localhost:3333')
 
 const useChat = (room: string, userId: string) => {
   const [messages, setMessages] = useState<

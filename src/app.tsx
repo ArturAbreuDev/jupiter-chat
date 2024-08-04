@@ -1,3 +1,4 @@
+/* eslint-disable no-self-compare */
 import React, { useEffect, useState } from 'react'
 import useChat from './hooks/useChat'
 import { Sidebar } from './components/sidebar'
@@ -21,8 +22,6 @@ export function App() {
   const [newChatName, setNewChatName] = useState('')
   const [showNewChatModal, setShowNewChatModal] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
-  const backendUrl =
-    process.env.BACKEND_URL || 'https://jupiter-chat-server.onrender.com/'
 
   useEffect(() => {
     const id = localStorage.getItem('userId') || uuidv4()
@@ -63,6 +62,7 @@ export function App() {
       { icon: <Wrench /> },
     )
   }
+
   const handleSearch = () => {
     toast.info(
       'Futuramente, você poderá pesquisar salas de chat.\n\nFique atento às atualizações!',
@@ -94,8 +94,14 @@ export function App() {
   }
 
   const handleSendMessage = () => {
-    sendMessage(messageInput)
-    setMessageInput('')
+    if (messageInput.trim()) {
+      sendMessage(messageInput)
+      setMessageInput('')
+      setNotifications((prevNotifications) => [
+        ...prevNotifications,
+        'Mensagem enviada!',
+      ])
+    }
   }
 
   const handleNewChat = () => {
@@ -105,6 +111,10 @@ export function App() {
     localStorage.setItem('rooms', JSON.stringify(newRooms))
     setShowNewChatModal(false)
     setNewChatName('')
+    setNotifications((prevNotifications) => [
+      ...prevNotifications,
+      `Nova sala "${newChatName}" criada!`,
+    ])
   }
 
   const handleDeleteRoom = async () => {
@@ -118,9 +128,12 @@ export function App() {
         return
       }
       try {
-        const response = await fetch(`${backendUrl}/messages/${currentRoom}`, {
-          method: 'DELETE',
-        })
+        const response = await fetch(
+          `http://localhost:3333/messages/${currentRoom}`,
+          {
+            method: 'DELETE',
+          },
+        )
         const responseData = await response.json()
         console.log('Delete response:', responseData)
 
@@ -132,15 +145,23 @@ export function App() {
         setRooms(updatedRooms)
         localStorage.setItem('rooms', JSON.stringify(updatedRooms))
 
-        // eslint-disable-next-line no-self-compare
         if (currentRoom === currentRoom) {
           setCurrentRoom('Global')
         }
+
+        setNotifications((prevNotifications) => [
+          ...prevNotifications,
+          `Sala "${currentRoom}" deletada!`,
+        ])
       } catch (error) {
         toast.error('Error deleting room.', { icon: <Wrench /> })
         console.error('Error deleting room:', error)
       }
     }
+  }
+
+  const clearNotifications = () => {
+    setNotifications([])
   }
 
   return (
@@ -179,7 +200,10 @@ export function App() {
           setShowNewChatModal={setShowNewChatModal}
         />
       )}
-      <Notifications notifications={notifications} />
+      <Notifications
+        notifications={notifications}
+        clearNotifications={clearNotifications}
+      />
     </div>
   )
 }
