@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
 const backendUrl =
-  process.env.BACKEND_URL || 'https://jupiter-chat-server.vercel.app/'
+  process.env.BACKEND_URL || 'https://jupiter-chat-server.onrender.com/'
 
 const socket = io(backendUrl)
 
