@@ -1,6 +1,18 @@
 import React from 'react'
 
-export function MessageBubble({ message, sender, timestamp, fromUser }) {
+interface MessageBubbleProps {
+  message: string
+  sender: { avatar: string }
+  timestamp: string
+  fromUser: boolean
+}
+
+export const MessageBubble: React.FC<MessageBubbleProps> = ({
+  message,
+  sender,
+  timestamp,
+  fromUser,
+}) => {
   return (
     <div className={`flex mb-4 ${fromUser ? 'justify-end' : ''}`}>
       <div className={`flex items-end ${!fromUser ? 'flex-row-reverse' : ''}`}>

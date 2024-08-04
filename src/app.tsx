@@ -1,38 +1,51 @@
-import {
-  AlertTriangle,
-  ChevronDown,
-  ChevronRight,
-  Menu,
-  MessageCircleMoreIcon,
-  Plus,
-  Search,
-  Send,
-  Smile,
-  Trash,
-} from 'lucide-react'
-import React, { useState } from 'react'
-import { MessageBubble } from './components/messageBubble'
+import React, { useEffect, useState } from 'react'
+import useChat from './hooks/useChat'
+import { Sidebar } from './components/sidebar'
+import { ChatHeader } from './components/chatHeader'
+import { ChatBody } from './components/chatBody'
+import { MessageInput } from './components/messageInput'
+import { NewChatModal } from './components/newChatModal'
+import { Notifications } from './components/notifications'
+import { v4 as uuidv4 } from 'uuid'
+import { Wrench } from 'lucide-react'
+import { toast, ToastContainer } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export function App() {
-  const [messages, setMessages] = useState([
-    {
-      message:
-        'bla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla bla',
-      sender: { avatar: '/footer-logo.webp' },
-      timestamp: '10:30 AM',
-      fromUser: false,
-    },
-    {
-      message:
-        'bla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla blabla bla bla bla bla bla bla :)',
-      sender: { avatar: '/footer-logo.webp' },
-      timestamp: '10:32 AM',
-      fromUser: true,
-    },
-  ])
-
   const [menuResponsive, setMenuResponsive] = useState(false)
   const [showChats, setShowChats] = useState(false)
+  const [messageInput, setMessageInput] = useState('')
+  const [userId, setUserId] = useState<string>('')
+  const [currentRoom, setCurrentRoom] = useState<string>('Global')
+  const [rooms, setRooms] = useState<string[]>([])
+  const [newChatName, setNewChatName] = useState('')
+  const [showNewChatModal, setShowNewChatModal] = useState(false)
+  const [notifications, setNotifications] = useState<string[]>([])
+
+  useEffect(() => {
+    const id = localStorage.getItem('userId') || uuidv4()
+    localStorage.setItem('userId', id)
+    setUserId(id)
+
+    const savedRooms = JSON.parse(localStorage.getItem('rooms') || '["Global"]')
+    setRooms(savedRooms)
+  }, [])
+
+  const { messages, sendMessage } = useChat(currentRoom, userId)
+
+  useEffect(() => {
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1]
+      if (lastMessage.userId !== userId) {
+        // Add notification if message is from another user
+        const notificationMessage = `${lastMessage.userId} sent a message in ${currentRoom}`
+        setNotifications((prevNotifications) => [
+          ...prevNotifications,
+          notificationMessage,
+        ])
+      }
+    }
+  }, [messages, userId, currentRoom])
 
   const toggleMenuResponsive = () => {
     setMenuResponsive(!menuResponsive)
@@ -42,96 +55,132 @@ export function App() {
     setShowChats(!showChats)
   }
 
-  return (
-    <div className="bg-zinc-200 p-6 flex h-screen gap-4">
-      <aside
-        className={`transition-all overflow-y-auto duration-300 ${menuResponsive ? 'w-96' : 'w-52'} flex flex-col justify-between items-center rounded-md p-8 bg-jupiter-primary`}
-      >
-        <div>
-          <Menu
-            className="size-8 text-white cursor-pointer"
-            onClick={toggleMenuResponsive}
-          />
-        </div>
+  const handleEmoji = () => {
+    toast.info(
+      'Para inserir emojis, use o atalho do sistema: \n\nWindows: Win + .\nMac: Ctrl + Cmd + Space',
+      { icon: <Wrench /> },
+    )
+  }
+  const handleSearch = () => {
+    toast.info(
+      'Futuramente, você poderá pesquisar salas de chat.\n\nFique atento às atualizações!',
+      {
+        icon: <Wrench />,
+        style: { fontSize: '16px', backgroundColor: '#e9ecef', color: '#333' },
+      },
+    )
+  }
 
-        <div className="flex-1 w-full my-10 flex flex-col gap-5 justify-start items-center">
-          <div
-            className={`px-4 transition-all py-6 text-white rounded-md bg-jupiter-secondary w-full ${menuResponsive ? 'justify-between' : 'justify-center'} flex  items-center`}
-          >
-            <Plus />
-            {menuResponsive && 'New chat'}
-          </div>
-          <div
-            className={`px-4 transition-all py-6 text-white rounded-md bg-jupiter-secondary w-full ${menuResponsive ? 'justify-between' : 'justify-center'} flex  items-center cursor-pointer`}
-            onClick={toggleShowChats}
-          >
-            {showChats ? <ChevronDown /> : <ChevronRight />}
-            {menuResponsive && 'Recent Chats '}
-          </div>
-          {showChats && (
-            <>
-              <div
-                className={`px-4 transition-all py-6 text-white rounded-md bg-jupiter-secondary w-full ${menuResponsive ? 'justify-between' : 'justify-center'} flex  items-center`}
-              >
-                <MessageCircleMoreIcon />
-                {menuResponsive && 'Chat 1'}
-              </div>
-              <div
-                className={`px-4 transition-all py-6 text-white rounded-md bg-jupiter-secondary w-full ${menuResponsive ? 'justify-between' : 'justify-center'} flex  items-center`}
-              >
-                <MessageCircleMoreIcon />
-                {menuResponsive && 'Chat 2'}
-              </div>
-              <div
-                className={`px-4 transition-all py-6 text-white rounded-md bg-jupiter-secondary w-full ${menuResponsive ? 'justify-between' : 'justify-center'} flex  items-center`}
-              >
-                <MessageCircleMoreIcon />
-                {menuResponsive && 'Chat 3'}
-              </div>
-            </>
-          )}
-        </div>
-        <img
-          src="/footer-logo.webp"
-          className="size-24 rounded-2xl"
-          alt="imagem de perfil"
-        />
-      </aside>
+  const handleFeedback = () => {
+    toast.info(
+      'Em breve, você poderá enviar feedbacks sobre os chats.\n\nAgradecemos sua paciência!',
+      {
+        icon: <Wrench />,
+        style: { fontSize: '16px', backgroundColor: '#e9ecef', color: '#333' },
+      },
+    )
+  }
+
+  const handleFile = () => {
+    toast.info(
+      'A funcionalidade de envio de arquivos será adicionada futuramente.\n\nFique ligado!',
+      {
+        icon: <Wrench />,
+        style: { fontSize: '16px', backgroundColor: '#e9ecef', color: '#333' },
+      },
+    )
+  }
+
+  const handleSendMessage = () => {
+    sendMessage(messageInput)
+    setMessageInput('')
+  }
+
+  const handleNewChat = () => {
+    if (newChatName.trim() === '') return
+    const newRooms = [...rooms, newChatName]
+    setRooms(newRooms)
+    localStorage.setItem('rooms', JSON.stringify(newRooms))
+    setShowNewChatModal(false)
+    setNewChatName('')
+  }
+
+  const handleDeleteRoom = async () => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete the room "${currentRoom}"?`,
+      )
+    ) {
+      if (currentRoom === 'Global') {
+        toast.error('Cannot delete the "Global" room.', { icon: <Wrench /> })
+        return
+      }
+      try {
+        const response = await fetch(
+          `http://localhost:3333/messages/${currentRoom}`,
+          {
+            method: 'DELETE',
+          },
+        )
+        const responseData = await response.json()
+        console.log('Delete response:', responseData)
+
+        if (!response.ok) {
+          throw new Error('Failed to delete messages')
+        }
+
+        const updatedRooms = rooms.filter((room) => room !== currentRoom)
+        setRooms(updatedRooms)
+        localStorage.setItem('rooms', JSON.stringify(updatedRooms))
+
+        // eslint-disable-next-line no-self-compare
+        if (currentRoom === currentRoom) {
+          setCurrentRoom('Global')
+        }
+      } catch (error) {
+        toast.error('Error deleting room.', { icon: <Wrench /> })
+        console.error('Error deleting room:', error)
+      }
+    }
+  }
+
+  return (
+    <div className="bg-zinc-200 p-2 md:p-6 flex h-screen gap-4">
+      <Sidebar
+        menuResponsive={menuResponsive}
+        showChats={showChats}
+        rooms={rooms}
+        setCurrentRoom={setCurrentRoom}
+        setShowNewChatModal={setShowNewChatModal}
+        toggleMenuResponsive={toggleMenuResponsive}
+        toggleShowChats={toggleShowChats}
+      />
       <main className="flex flex-1 flex-col justify-between items-center overflow-y-auto">
-        <header className="w-full items-center justify-end flex gap-4">
-          <AlertTriangle className="cursor-pointer text-red-600" />
-          <Trash className="cursor-pointer text-gray-900" />
-          <Search className="cursor-pointer" />
-        </header>
-        <main className="flex w-full flex-col flex-1 justify-end">
-          {messages.map((msg, index) => (
-            <MessageBubble
-              key={index}
-              message={msg.message}
-              sender={msg.sender}
-              timestamp={msg.timestamp}
-              fromUser={msg.fromUser}
-            />
-          ))}
-        </main>
-        <div className="p-4 flex justify-between items-center bg-white w-full rounded-xl border border-jupiter-primary">
-          <input
-            type="text"
-            name=""
-            id=""
-            placeholder="Type a new message here"
-            className="flex-1 outline-none"
-          />
-          <div className="flex gap-2">
-            <div>
-              <Smile />
-            </div>
-            <button>
-              <Send className="text-jupiter-secondary" />
-            </button>
-          </div>
-        </div>
+        <ToastContainer />
+        <ChatHeader
+          currentRoom={currentRoom}
+          handleDeleteRoom={handleDeleteRoom}
+          handleFeedback={handleFeedback}
+          handleSearch={handleSearch}
+        />
+        <ChatBody messages={messages} userId={userId} />
+        <MessageInput
+          messageInput={messageInput}
+          setMessageInput={setMessageInput}
+          handleSendMessage={handleSendMessage}
+          handleEmoji={handleEmoji}
+          handleFile={handleFile}
+        />
       </main>
+      {showNewChatModal && (
+        <NewChatModal
+          newChatName={newChatName}
+          setNewChatName={setNewChatName}
+          handleNewChat={handleNewChat}
+          setShowNewChatModal={setShowNewChatModal}
+        />
+      )}
+      <Notifications notifications={notifications} />
     </div>
   )
 }
