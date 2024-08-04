@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const backendUrl = process.env.BACKEND_URL || 'http://localhost:3333'
+const backendUrl =
+  process.env.BACKEND_URL || 'https://jupiter-chat-server.vercel.app/'
 
 const socket = io(backendUrl)
 

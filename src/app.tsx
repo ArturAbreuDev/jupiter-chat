@@ -21,7 +21,8 @@ export function App() {
   const [newChatName, setNewChatName] = useState('')
   const [showNewChatModal, setShowNewChatModal] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
-  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3333'
+  const backendUrl =
+    process.env.BACKEND_URL || 'https://jupiter-chat-server.vercel.app/'
 
   useEffect(() => {
     const id = localStorage.getItem('userId') || uuidv4()
