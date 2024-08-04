@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react'
 import io from 'socket.io-client'
 
-const socket = io('http://localhost:3333')
+const backendUrl = process.env.BACKEND_URL || 'http://localhost:3333'
+
+const socket = io(backendUrl)
 
 const useChat = (room: string, userId: string) => {
   const [messages, setMessages] = useState<

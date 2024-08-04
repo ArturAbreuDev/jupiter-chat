@@ -21,6 +21,7 @@ export function App() {
   const [newChatName, setNewChatName] = useState('')
   const [showNewChatModal, setShowNewChatModal] = useState(false)
   const [notifications, setNotifications] = useState<string[]>([])
+  const backendUrl = process.env.BACKEND_URL || 'http://localhost:3333'
 
   useEffect(() => {
     const id = localStorage.getItem('userId') || uuidv4()
@@ -116,12 +117,9 @@ export function App() {
         return
       }
       try {
-        const response = await fetch(
-          `http://localhost:3333/messages/${currentRoom}`,
-          {
-            method: 'DELETE',
-          },
-        )
+        const response = await fetch(`${backendUrl}/messages/${currentRoom}`, {
+          method: 'DELETE',
+        })
         const responseData = await response.json()
         console.log('Delete response:', responseData)
 
